@@ -277,6 +277,35 @@ class ChatOpenAI(BaseChatModel):
             )
             return ChatResult(generations=[ChatGeneration(message=message)])
         response = self.completion_with_retry(messages=message_dicts, **params)
+        from datetime import datetime, date
+        today = str(date.today())
+        with open('/home/ubuntu/luna/logs/' + today + '.log', 'a') as f:
+            now = datetime.now()
+            f.write(str(now) + ':')
+            f.write(' Calling GPT with params\n')
+            for key in params.keys():
+                f.write(key + ': ')
+                f.write(str(params[key]))
+                f.write('\n')
+            f.write(' Calling GPT with messages\n')
+            for k, message_k in enumerate(message_dicts):
+                f.write('Message ' + str(k) + ':')
+                for key in message_k.keys():
+                    f.write(key + ': ')
+                    f.write(str(message_k[key]))
+                    f.write('\n')
+            f.write('RESULTS: \n')
+            f.write(response['id'])
+            f.write(response['object'])
+            f.write(str(response['created']))
+            f.write(response['model'])
+            for key in response['usage'].keys():
+                f.write(key + ': ' + str(response['usage'][key]))
+            for choice in response['choices']:
+                f.write('index' + ': ' + str(choice['index']))
+                f.write('finish_reason' + ': ' + str(choice['finish_reason']))
+                for key in choice['message'].keys():
+                    f.write(key + ': ' + choice['message'][key])
         return self._create_chat_result(response)
 
     def _create_message_dicts(

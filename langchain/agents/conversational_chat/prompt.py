@@ -62,7 +62,7 @@ Use this if you want to respond directly to the human. Markdown code snippet for
 ```"""
 
 SUFFIX = """Instructions:
- Before answering the question to the user state each step in your process and write the work for performing that step. Your step-by-step process should include (but not be limited to) the following:
+ Before answering the question to the user, state each step in your process and write the work for performing that step. Your step-by-step process should include (but not be limited to) the following:
  • what facts do you need to look for in the instructions, context, objection handling, and product catalog to answer the question?
  • does the context and product catalog contain all the facts needed to answer the question?
  • Think and list how you might use the sales technics and communication style that is listed in the context

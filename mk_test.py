@@ -1,8 +1,10 @@
 import os
 import sys
+import pickle
 os.chdir('/home/ubuntu/deployment/langchain')
 sys.path.append('/home/ubuntu/deployment/langchain')
-os.environ['OPENAI_API_KEY'] = "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"
+sys.path.append('/home/ubuntu/deployment/luna')
+os.environ['OPENAI_API_KEY'] = "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"
 new_path = []
 for old_path in sys.path:
     if '/tmp' in old_path:
@@ -10,6 +12,7 @@ for old_path in sys.path:
     new_path.append(old_path)
 sys.path = new_path
 
+import agent
 from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
 from langchain.memory import ConversationBufferMemory
 from langchain import OpenAI, LLMChain,  PromptTemplate
@@ -106,6 +109,11 @@ if __name__ == '__main__':
     #     suffix=suffix,
     #     input_variables=["input", "chat_history", "agent_scratchpad"]
     # )
+    f = open('/home/ubuntu/deployment/agent.pickle', 'rb')
+    agent_chain = pickle.load(f)
+    agent_chain.run("input=" + "What kind of mattresses are there?" + "")
+
+
 
     # prompt = ChatPromptTemplate(prefix)
     system_message_prompt = SystemMessagePromptTemplate.from_template(prefix)
