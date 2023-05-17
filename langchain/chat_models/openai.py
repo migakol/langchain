@@ -31,7 +31,7 @@ from langchain.schema import (
 from langchain.utils import get_from_dict_or_env
 
 logger = logging.getLogger(__name__)
-
+import log
 
 def _create_retry_decorator(llm: ChatOpenAI) -> Callable[[Any], Any]:
     import openai
@@ -253,30 +253,8 @@ class ChatOpenAI(BaseChatModel):
                     overall_token_usage[k] = v
         return {"token_usage": overall_token_usage, "model_name": self.model_name}
 
-    def _generate(
-        self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
-    ) -> ChatResult:
-        message_dicts, params = self._create_message_dicts(messages, stop)
-        if self.streaming:
-            inner_completion = ""
-            role = "assistant"
-            params["stream"] = True
-            for stream_resp in self.completion_with_retry(
-                messages=message_dicts, **params
-            ):
-                role = stream_resp["choices"][0]["delta"].get("role", role)
-                token = stream_resp["choices"][0]["delta"].get("content", "")
-                inner_completion += token
-                if run_manager:
-                    run_manager.on_llm_new_token(token)
-            message = _convert_dict_to_message(
-                {"content": inner_completion, "role": role}
-            )
-            return ChatResult(generations=[ChatGeneration(message=message)])
-        response = self.completion_with_retry(messages=message_dicts, **params)
+
+    def print_logs_into_file(self, params, message_dicts, response):
         from datetime import datetime, date
         today = str(date.today())
         with open('/home/ubuntu/luna/logs/' + today + '.log', 'a') as f:
@@ -306,6 +284,39 @@ class ChatOpenAI(BaseChatModel):
                 f.write('finish_reason' + ': ' + str(choice['finish_reason']))
                 for key in choice['message'].keys():
                     f.write(key + ': ' + choice['message'][key])
+
+    def _generate(
+        self,
+        messages: List[BaseMessage],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+    ) -> ChatResult:
+        message_dicts, params = self._create_message_dicts(messages, stop)
+        if self.streaming:
+            inner_completion = ""
+            role = "assistant"
+            params["stream"] = True
+            for stream_resp in self.completion_with_retry(
+                messages=message_dicts, **params
+            ):
+                role = stream_resp["choices"][0]["delta"].get("role", role)
+                token = stream_resp["choices"][0]["delta"].get("content", "")
+                inner_completion += token
+                if run_manager:
+                    run_manager.on_llm_new_token(token)
+            message = _convert_dict_to_message(
+                {"content": inner_completion, "role": role}
+            )
+            return ChatResult(generations=[ChatGeneration(message=message)])
+        response = self.completion_with_retry(messages=message_dicts, **params)
+        self.print_logs_into_file(params, message_dicts, response)
+        ## Luna Call for logging ##
+        chat_results = self._create_chat_result(response)
+        generations = [{"gen_number": i, "text": gen.text} for i, gen in enumerate(chat_results.generations)]
+        message_saver = log.Logger('123')
+        message_saver.save_openai_interaction(message_dicts, generations)
+        #####
+
         return self._create_chat_result(response)
 
     def _create_message_dicts(
