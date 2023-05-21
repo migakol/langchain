@@ -303,7 +303,7 @@ class ChatOpenAI(BaseChatModel):
         input_start = response['choices'][0]['message']['content'].find("action_input")
         quote_start = response['choices'][0]['message']['content'][input_start:].find(':')
         quote_end = response['choices'][0]['message']['content'][input_start + quote_start:].find('\n')
-        final_str = response['choices'][0]['message']['content'][:input_start + quote_start] + ':'
+        final_str = response['choices'][0]['message']['content'][:input_start + quote_start] + ': '
         res = response1['choices'][0]['message']['content']
         if res[0] == '\"' and res[-1] == '\"':
             final_str = final_str + res + \
