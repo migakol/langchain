@@ -423,6 +423,7 @@ class Agent(BaseSingleActionAgent):
         """
         full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
         full_output = self.llm_chain.predict(callbacks=callbacks, **full_inputs)
+        print('MICHKOL ', full_output)
         return self.output_parser.parse(full_output)
 
     async def aplan(
