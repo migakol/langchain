@@ -294,7 +294,9 @@ class ChatOpenAI(BaseChatModel):
         my_prompt = my_prompt + " The question is \' " + user_input + " \'.\n"
         my_prompt = my_prompt + "you don't have enough information to answer the question based on previous messages.\n"
         my_prompt = my_prompt + "Pandas Database System has information about all products in the company Catalogue.\n"
-        my_prompt = my_prompt + "Make sure you consider products mentioned in previous messages when defining similarity string.\n"
+        # my_prompt = my_prompt + "Make sure you consider products mentioned in previous messages when defining similarity string.\n"
+        my_prompt = my_prompt + "Similarity string should include a product. If the product type is in the question, use it."
+        my_prompt = my_prompt + "If the product type is not in the question, use a type from previous messages."
         my_prompt = my_prompt + "Return the similarity string only.\n"
         message_dicts[-1]['content'] = my_prompt
         response1 = self.completion_with_retry(messages=message_dicts, **params)
@@ -339,8 +341,10 @@ class ChatOpenAI(BaseChatModel):
         ## Luna Call for logging ##
         chat_results = self._create_chat_result(response)
         generations = [{"gen_number": i, "text": gen.text} for i, gen in enumerate(chat_results.generations)]
-        message_saver = log.Logger(self.external_id)
-        message_saver.save_openai_interaction(message_dicts, generations)
+        # todo - something happens with logging
+        if hasattr(self, 'external_id'):
+            message_saver = log.Logger(self.external_id)
+            message_saver.save_openai_interaction(message_dicts, generations)
         #####
 
         return self._create_chat_result(response)
