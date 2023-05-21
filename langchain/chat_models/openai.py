@@ -131,6 +131,9 @@ class ChatOpenAI(BaseChatModel):
     max_tokens: Optional[int] = None
     """Maximum number of tokens to generate."""
 
+    # Added for Luna
+    external_id : str = None
+
     class Config:
         """Configuration for this pydantic object."""
 
@@ -285,6 +288,25 @@ class ChatOpenAI(BaseChatModel):
                 for key in choice['message'].keys():
                     f.write(key + ': ' + choice['message'][key])
 
+    def post_prompt(self, message_dicts, params, response):
+        user_input = message_dicts[-1]['content'][message_dicts[-1]['content'].find('\ninput') + 7:]
+        my_prompt = "Write a string that can be used for similarity search in Pandas Database System for answering my question.\n"
+        my_prompt = my_prompt + " The question is \' " + user_input + " \'.\n"
+        my_prompt = my_prompt + "you don't have enough information to answer the question based on previous messages.\n"
+        my_prompt = my_prompt + "Pandas Database System has information about all products in the company Catalogue.\n"
+        my_prompt = my_prompt + "Make sure you consider products mentioned in previous messages when defining similarity string.\n"
+        my_prompt = my_prompt + "Return the similarity string only.\n"
+        message_dicts[-1]['content'] = my_prompt
+        response1 = self.completion_with_retry(messages=message_dicts, **params)
+        input_start = response['choices'][0]['message']['content'].find("action_input")
+        quote_start = response['choices'][0]['message']['content'][input_start + 14:].find('\"')
+        quote_end = response['choices'][0]['message']['content'][input_start + 14 + quote_start + 1:].find('\"')
+        final_str = response['choices'][0]['message']['content'][:input_start + 14 + quote_start]
+        final_str = final_str + response1['choices'][0]['message']['content'] + \
+                    response['choices'][0]['message']['content'][
+                    input_start + 14 + quote_start + 1 + quote_end + 1:]
+        response['choices'][0]['message']['content'] = final_str
+        return response
     def _generate(
         self,
         messages: List[BaseMessage],
@@ -309,11 +331,15 @@ class ChatOpenAI(BaseChatModel):
             )
             return ChatResult(generations=[ChatGeneration(message=message)])
         response = self.completion_with_retry(messages=message_dicts, **params)
+        if 'choices' in response.keys():
+            if 'message' in response['choices'][0].keys():
+                if 'action' in response['choices'][0]['message']['content'] and 'Pandans Database System' in response['choices'][0]['message']['content']:
+                    response = self.post_prompt(message_dicts, params, response)
         self.print_logs_into_file(params, message_dicts, response)
         ## Luna Call for logging ##
         chat_results = self._create_chat_result(response)
         generations = [{"gen_number": i, "text": gen.text} for i, gen in enumerate(chat_results.generations)]
-        message_saver = log.Logger('123')
+        message_saver = log.Logger(self.external_id)
         message_saver.save_openai_interaction(message_dicts, generations)
         #####
 

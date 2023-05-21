@@ -60,7 +60,6 @@ Handling objections:
 
 FORMAT_INSTRUCTIONS = """RESPONSE FORMAT INSTRUCTIONS
 ----------------------------
-
 When responding to me, please output a response in one of two formats:
 
 **Option 1:**
@@ -71,6 +70,7 @@ Markdown code snippet formatted in the following schema:
 {{{{
     "action": string \\ The action to take. Must be one of {tool_names}
     "action_input": string \\ The input to the action
+    "reason": string \\ The reason to ask the user to make this action and to use this input
 }}}}
 ```
 
@@ -81,18 +81,26 @@ Use this if you want to respond directly to the human. Markdown code snippet for
 {{{{
     "action": "Final Answer",
     "action_input": string \\ You should put what you want to return to use here
+    "reason": string \\ You should put the reasoning for your final answer. what facts helped you?. which sales technics did you use?
+    "sales_technics": string \\ You should put the sales technics that you used for your final answer
+    "objection_handling": string \\ You should put how did you handle user objections to buy
+    "communication_style": string \\ You should put communication style that you used for your final answer
 }}}}
 ```"""
 
-SUFFIX = """Instructions:
+LUNA_INSTRUCTIONS = """INSTRUCTIONS:
+-------------
  Before answering the question to the user, state each step in your process and write the work for performing that step. Your step-by-step process should include (but not be limited to) the following:
- * Does the user knows what he wants to buy? If yes, don’t ask personalization questions. If no, ask questions to help personalized your guidance and recommendations.
+ • Does the user knows what he wants to buy? If yes, don’t ask personalization questions. If no, ask questions to help personalized your guidance and recommendations.
  • what facts do you need to look for in the instructions, context, sales technics, objection handling, and product catalog to answer the question?
  • does the context and product catalog contain all the facts needed to answer the question?
  • Think and list how you might use the sales technics and communication style that is listed in the context
  • Think and then write how you might answer the question given what you know. if you don not have enough facts, answer “I am not sure; let me check that and get back to you"
- * make sure you never ask more than one question in every message
+ • make sure you never ask more than one question in every message
+"""
 
+
+SUFFIX =  """TOOLS:
 ------
 You can ask the user to use tools to look up information that may be helpful in answering the users original question. The tools the human can use are:
 
