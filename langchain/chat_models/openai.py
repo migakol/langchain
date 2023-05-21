@@ -301,12 +301,16 @@ class ChatOpenAI(BaseChatModel):
         message_dicts[-1]['content'] = my_prompt
         response1 = self.completion_with_retry(messages=message_dicts, **params)
         input_start = response['choices'][0]['message']['content'].find("action_input")
-        quote_start = response['choices'][0]['message']['content'][input_start + 14:].find('\"')
-        quote_end = response['choices'][0]['message']['content'][input_start + 14 + quote_start + 1:].find('\"')
-        final_str = response['choices'][0]['message']['content'][:input_start + 14 + quote_start]
-        final_str = final_str + response1['choices'][0]['message']['content'] + \
-                    response['choices'][0]['message']['content'][
-                    input_start + 14 + quote_start + 1 + quote_end + 1:]
+        quote_start = response['choices'][0]['message']['content'][input_start:].find(':')
+        quote_end = response['choices'][0]['message']['content'][input_start + quote_start:].find('\n')
+        final_str = response['choices'][0]['message']['content'][:input_start + quote_start] + ':'
+        res = response1['choices'][0]['message']['content']
+        if res[0] == '\"' and res[-1] == '\"':
+            final_str = final_str + res + \
+                    response['choices'][0]['message']['content'][input_start + quote_start + quote_end:]
+        else:
+            final_str = final_str + '\"' + res + '\"' + \
+                        response['choices'][0]['message']['content'][input_start + quote_start + quote_end:]
         response['choices'][0]['message']['content'] = final_str
         return response
     def _generate(
