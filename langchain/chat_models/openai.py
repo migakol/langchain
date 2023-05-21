@@ -344,7 +344,9 @@ class ChatOpenAI(BaseChatModel):
         # todo - something happens with logging
         if hasattr(self, 'external_id'):
             message_saver = log.Logger(self.external_id)
-            message_saver.save_openai_interaction(message_dicts, generations)
+        else:
+            message_saver = log.Logger(0)
+        message_saver.save_openai_interaction(message_dicts, generations)
         #####
 
         return self._create_chat_result(response)
