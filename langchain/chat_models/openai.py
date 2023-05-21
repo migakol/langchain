@@ -336,7 +336,9 @@ class ChatOpenAI(BaseChatModel):
         if 'choices' in response.keys():
             if 'message' in response['choices'][0].keys():
                 if 'action' in response['choices'][0]['message']['content'] and 'Pandans Database System' in response['choices'][0]['message']['content']:
+                    print('MICH_BEFORE ', response)
                     response = self.post_prompt(message_dicts, params, response)
+                    print('MICH_AFTER ', response)
         self.print_logs_into_file(params, message_dicts, response)
         ## Luna Call for logging ##
         chat_results = self._create_chat_result(response)
