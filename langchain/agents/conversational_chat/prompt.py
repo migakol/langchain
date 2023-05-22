@@ -54,6 +54,7 @@ When responding to me, please output a response in one of two formats:
 Use this if you want the human to use a tool.
 Markdown code snippet formatted in the following schema:
 
+please focusing on the most recent product discussed in the assistant's answer
 ```json
 {{{{
     "action": string \\ The action to take. Must be one of Pandans Database System, FAQ - frequently ask questions, Greeting tool, Pandas contact information
