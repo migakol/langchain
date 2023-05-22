@@ -56,8 +56,9 @@ Markdown code snippet formatted in the following schema:
 
 ```json
 {{{{
-    "action": string \\ The action to take. Must be one of {tool_names}
-    "action_input": string \\ The input to the action
+    "action": string \\ The action to take. Must be one of Pandans Database System, FAQ - frequently ask questions, Greeting tool, Pandas contact information
+    "action_input": string \\ The input to the action. make sure the input it is the most relevant to the most recent product in the chat
+    "action_input_reason" : string \\ You should put here the reason for the action input string. why it is relevant for the most recent product in discussion ?
 }}}}
 ```
 
